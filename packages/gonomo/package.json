@@ -1,6 +1,6 @@
 {
   "name": "gonomo",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "TEKIBO",
   "type": "module",
   "main": "./dist/index.js",
