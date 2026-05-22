@@ -1,0 +1,15 @@
+:root {
+    --color-background: oklch(25.75% 0.008 240.18);
+    --color-surface: oklch(30.75% 0.008 240.18);
+    --color-surface-high: oklch(35.75% 0.008 240.18);
+
+    --color-accent: oklch(45.75% 0.18 240.18);
+    --color-accent-soft: oklch(45.75% 0.18 240.18 / 0.4);
+    --color-accent-highlight: oklch(65.75% 0.18 240.18);
+    --color-accent-highlight-soft: oklch(65.75% 0.18 240.18 / 0.4);
+
+    --color-text: oklch(92.75% 0.02 240.18);
+
+    --color-shadow: oklch(15.75% 0.008 240.18);
+    --color-border: oklch(35.75% 0.008 240.18);
+}

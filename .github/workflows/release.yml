@@ -1,0 +1,154 @@
+name: Release Gonomo
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump type (patch, minor, major)'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  build-linux:
+    name: Build Linux x64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
+          cache-dependency-path: "gonomo/go.sum"
+      - name: Install dependencies
+        run: sudo apt-get update && (sudo apt-get install -y libwebkit2gtk-4.1-dev || sudo apt-get install -y libwebkit2gtk-4.0-dev)
+      - name: Build
+        run: GOARCH=amd64 go build -o ../gonomo-linux-x64 ./cmd/gonomo
+        working-directory: ./gonomo
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-bin
+          path: gonomo-linux-x64
+
+  build-macos:
+    name: Build macOS (x64 and arm64)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
+          cache-dependency-path: "gonomo/go.sum"
+      - name: Build x64
+        run: GOARCH=amd64 go build -o ../gonomo-x64 ./cmd/gonomo
+        working-directory: ./gonomo
+      - name: Build arm64
+        run: GOARCH=arm64 go build -o ../gonomo-arm64 ./cmd/gonomo
+        working-directory: ./gonomo
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-bin
+          path: |
+            gonomo-x64
+            gonomo-arm64
+
+  build-windows:
+    name: Build Windows x64
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
+          cache-dependency-path: "gonomo/go.sum"
+      - name: Install rsrc
+        run: go install github.com/akavel/rsrc@latest
+      - name: Build Binary
+        run: powershell -ExecutionPolicy Bypass -File ./gonomo/scripts/build-gonomo.ps1 -Output ../gonomo-x64.exe
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-bin
+          path: gonomo-x64.exe
+
+  release:
+    name: Bump Version & Publish Release
+    needs: [build-linux, build-macos, build-windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump Version & Tag
+        run: |
+          cd packages/gonomo && npm version ${{ github.event.inputs.bump }} --no-git-tag-version
+          cd ../..
+          
+          NEW_VERSION=$(node -p "require('./packages/gonomo/package.json').version")
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          
+          git commit -am "chore: release v$NEW_VERSION"
+          git tag v$NEW_VERSION
+          git push origin HEAD
+          git push origin v$NEW_VERSION
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Packages
+        run: pnpm run --filter gonomo build
+
+      - name: Pack Tarballs
+        run: |
+          cd packages/gonomo && pnpm pack && mv *.tgz ../../gonomo.tgz
+
+      - name: Download Engine Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Move Artifacts to Root
+        run: |
+          mv artifacts/linux-bin/* .
+          mv artifacts/macos-bin/* .
+          mv artifacts/windows-bin/* .
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.NEW_VERSION }}
+          name: Release v${{ env.NEW_VERSION }}
+          files: |
+            gonomo.tgz
+            gonomo-linux-x64
+            gonomo-x64
+            gonomo-arm64
+            gonomo-x64.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

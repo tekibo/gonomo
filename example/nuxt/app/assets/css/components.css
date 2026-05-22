@@ -1,0 +1,95 @@
+.btn {
+    padding: 6px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn:hover {
+    background: var(--color-surface-high);
+}
+.btn-primary {
+    border-color: var(--color-accent);
+    background: var(--color-accent-soft);
+}
+.btn-primary:hover {
+    background: var(--color-accent-highlight-soft);
+    border-color: var(--color-accent-highlight);
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+}
+.card-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0;
+}
+
+pre {
+    background: rgba(0,0,0,0.25);
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 12px;
+    overflow-x: auto;
+    line-height: 1.5;
+    margin: 0;
+}
+
+code {
+    font-family: "Cascadia Code", "Fira Code", monospace;
+    font-size: 12px;
+    background: rgba(255,255,255,0.06);
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+input, select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: var(--color-surface-high);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    font-size: 12px;
+}
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 4px;
+}
+.section-desc {
+    font-size: 12px;
+    opacity: 0.6;
+    margin: 0 0 20px;
+}
+
+.prop-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 16px;
+    font-size: 12px;
+}
+.prop-key {
+    font-weight: 600;
+    font-family: monospace;
+    opacity: 0.8;
+}
+.prop-val {
+    opacity: 0.7;
+}

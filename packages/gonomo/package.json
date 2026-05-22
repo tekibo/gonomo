@@ -1,0 +1,35 @@
+{
+  "name": "gonomo",
+  "version": "0.0.1",
+  "author": "TEKIBO",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "bin": {
+    "gonomo": "./dist/cli.js"
+  },
+  "scripts": {
+    "prebuild": "node ./scripts/generate-constants.js",
+    "build": "tsc",
+    "predev": "node ./scripts/generate-constants.js",
+    "dev": "tsc --watch"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "tsx": "^4.22.3"
+  }
+}

@@ -1,0 +1,7 @@
+node_modules/
+.gonomo/
+gonomo.exe
+gonomo/gonomo.exe
+gonomo/cmd/gonomo/rsrc.syso
+resources/gonomo.ico
+**/dist
