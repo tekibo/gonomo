@@ -18,7 +18,7 @@ async function findGonomoBin(): Promise<string> {
 export async function runDev(args: string[]) {
   // Load typed config and write temp gonomo.json for the Go binary
   const config = await loadUserConfig(process.cwd())
-  await writeConfigJson(config, join(process.cwd(), 'gonomo.json'))
+  await writeConfigJson(config, join(process.cwd(), '.gonomo', 'gonomo.json'))
 
   const bin = await findGonomoBin()
   console.log(`Starting dev mode...`)

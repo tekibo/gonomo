@@ -9,7 +9,7 @@ const configTsTemplate = `import { defineConfig } from 'gonomo'
 export default defineConfig({
   name: '{{name}}',
   title: '{{name}}',
-  icon: 'icon.ico',
+  icon: '{{iconPath}}',
   window: {
     width: 1400,
     height: 900,
@@ -59,6 +59,31 @@ function detectPackageManager(): string {
   return 'npm'
 }
 
+async function findIcon(dir: string, depth = 0): Promise<string | null> {
+  if (depth > 3) return null
+  try {
+    const { readdir, stat } = await import('node:fs/promises')
+    const files = await readdir(dir)
+    // Check files first
+    for (const file of files) {
+      if (file === 'icon.ico' || file === 'favicon.ico' || file === 'icon.png') {
+        return join(dir, file)
+      }
+    }
+    // Then recurse into directories
+    for (const file of files) {
+      if (file === 'node_modules' || file.startsWith('.')) continue
+      const fullPath = join(dir, file)
+      const s = await stat(fullPath)
+      if (s.isDirectory()) {
+        const found = await findIcon(fullPath, depth + 1)
+        if (found) return found
+      }
+    }
+  } catch {}
+  return null
+}
+
 function addPackage(pm: string, name: string, dev = false): void {
   const devFlag = pm === 'bun' ? '-d' : '-D'
   execSync(`${pm} add ${dev ? `${devFlag} ` : ''}${name}`, { stdio: 'inherit' })
@@ -74,6 +99,13 @@ export async function runInit(args: string[]) {
   let runtime = 'node'
   let outputDir = '.output'
   let entry = 'server/index.mjs'
+  let iconPath = 'icon.ico'
+
+  const foundIcon = await findIcon(process.cwd())
+  if (foundIcon) {
+    const { relative } = await import('node:path')
+    iconPath = relative(process.cwd(), foundIcon).replace(/\\/g, '/')
+  }
 
   // Read package.json for name and framework detection
   const pkgPath = join(process.cwd(), 'package.json')
@@ -118,6 +150,7 @@ export async function runInit(args: string[]) {
     .replace('{{outputDir}}', outputDir)
     .replace('{{entry}}', entry)
     .replace('{{runtime}}', runtime)
+    .replace('{{iconPath}}', iconPath)
 
   await writeFile('gonomo.config.ts', configContent)
   console.log('Created gonomo.config.ts')

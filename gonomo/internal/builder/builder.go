@@ -21,7 +21,7 @@ type BuildOptions struct {
 }
 
 func Build(opts BuildOptions) error {
-	cfg, err := config.Load("gonomo.json")
+	cfg, err := config.Load(filepath.Join(".gonomo", "gonomo.json"))
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
@@ -73,7 +73,7 @@ func waitForURL(url string) error {
 }
 
 func Dev() error {
-	cfg, err := config.Load("gonomo.json")
+	cfg, err := config.Load(filepath.Join(".gonomo", "gonomo.json"))
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
